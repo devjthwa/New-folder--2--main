@@ -32,17 +32,38 @@ pipeline {
             }
         }
 
-        stage('Deploy to Apache Server') {
+        stage('Verify Build Output') {
             steps {
                 sh '''
-                echo "Cleaning Apache folder..."
-                ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "sudo rm -rf $DEPLOY_DIR/*"
-
-                echo "Copying build files..."
-                scp -i $SSH_KEY -o StrictHostKeyChecking=no -r my-react-app/dist/* ubuntu@$SERVER_IP:$DEPLOY_DIR
+                echo "Checking dist folder..."
+                ls -R my-react-app/dist
                 '''
             }
         }
 
+        stage('Deploy to Apache Server') {
+            steps {
+                sh '''
+                echo "Cleaning old files on server..."
+                ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "
+                    sudo rm -rf $DEPLOY_DIR/*"
+
+                echo "Deploying React build..."
+                scp -i $SSH_KEY -o StrictHostKeyChecking=no -r my-react-app/dist/. ubuntu@$SERVER_IP:$DEPLOY_DIR/
+
+                echo "Verifying deployment..."
+                ssh -i $SSH_KEY ubuntu@$SERVER_IP "ls -R $DEPLOY_DIR"
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment SUCCESS 🚀"
+        }
+        failure {
+            echo "Deployment FAILED ❌ Check logs"
+        }
     }
 }
