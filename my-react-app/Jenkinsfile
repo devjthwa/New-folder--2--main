@@ -4,7 +4,7 @@ pipeline {
     environment {
         SERVER_IP = "172.31.27.240"
         DEPLOY_DIR = "/var/www/html"
-        SSH_KEY = "/var/lib/jenkins/.ssh/id_rsa"
+        SSH_KEY = "/home/ubuntu/.ssh/id_rsa"
     }
 
     stages {
@@ -35,8 +35,10 @@ pipeline {
         stage('Deploy to Apache Server') {
             steps {
                 sh '''
+                echo "Cleaning Apache folder..."
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "sudo rm -rf $DEPLOY_DIR/*"
 
+                echo "Copying build files..."
                 scp -i $SSH_KEY -o StrictHostKeyChecking=no -r my-react-app/dist/* ubuntu@$SERVER_IP:$DEPLOY_DIR
                 '''
             }
