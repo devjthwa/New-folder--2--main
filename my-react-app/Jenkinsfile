@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    environment {
+        SERVER_IP = "172.31.43.15"
+        DEPLOY_DIR = "/var/www/html"
+    }
+
+    stages {
+
+        stage('Clone Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/divyesh2123/New-folder--2-.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('my-react-app') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Build React App') {
+            steps {
+                dir('my-react-app') {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Deploy to Apache Server') {
+            steps {
+                sh '''
+                ssh -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "sudo rm -rf $DEPLOY_DIR/*"
+                scp -o StrictHostKeyChecking=no -r my-react-app/build/* ubuntu@$SERVER_IP:$DEPLOY_DIR
+                '''
+            }
+        }
+
+    }
+}
