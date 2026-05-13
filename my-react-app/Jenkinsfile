@@ -46,10 +46,10 @@ pipeline {
                 sh '''
                 echo "Cleaning old files on server..."
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "
-                    sudo rm -rf $DEPLOY_DIR/*"
+                    sudo rm -rf /var/www/html/*"
 
                 echo "Deploying React build..."
-                scp -i $SSH_KEY -o StrictHostKeyChecking=no -r my-react-app/dist/. ubuntu@$SERVER_IP:$DEPLOY_DIR/
+                scp -i $SSH_KEY -o StrictHostKeyChecking=no -r my-react-app/dist/. ubuntu@$SERVER_IP:/var/www/html/
 
                 echo "Verifying deployment..."
                 ssh -i $SSH_KEY ubuntu@$SERVER_IP "ls -R $DEPLOY_DIR"
